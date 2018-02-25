@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+<PluginConfig>
+	<Field id='debugSeparator' type='separator' />
+	<Field id='showDebugInfo' type='checkbox' defaultValue='false'>
+		<Label>Enable debuging:</Label>
+	</Field>
+</PluginConfig>

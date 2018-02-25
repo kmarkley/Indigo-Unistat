@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<Devices>
+	<Device type="thermostat" id="DeviceUnistat">
+		<Name>Device Unistat</Name>
+		<ConfigUI>
+			<Field id='description0' type='label'>
+                <Label>Turns devices on/off when input value crosses threshold.</Label>
+            </Field>
+            <Field id='tempSeparator' type='separator' />
+			<Field id='tempSection' type='label' fontColor='blue'>
+                <Label>Input</Label>
+			</Field>
+			<Field id='tempDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Define the source of the input data.  This will appear in UI as a temperature, but can be any numerical value.</Label>
+			</Field>
+			<Field id='inputType' type='menu' defaultValue='dev'>
+				<Label>Input Type</Label>
+				<List>
+					<Option value='dev'>Device State</Option>
+					<Option value='var'>Variable Value</Option>
+				</List>
+			</Field>
+			<Field id='inputDevice' type='menu' visibleBindingId='inputType' visibleBindingValue='dev'>
+                <Label>Input Device:</Label>
+                <List class='self' method='getInputDeviceList'/>
+				<CallbackMethod>loadStates</CallbackMethod>
+            </Field>
+			<Field id='inputState' type='menu' visibleBindingId='inputType' visibleBindingValue='dev'>
+                <Label>Input State:</Label>
+                <List class='self' filter='inputDevice' method='getDeviceStateList' dynamicReload='true'/>
+            </Field>
+			<Field id='inputVariable' type='menu' visibleBindingId='inputType' visibleBindingValue='var'>
+                <Label>Input Variable:</Label>
+                <List class='indigo.variables'/>
+            </Field>
+			<Field id='deadband' type='textfield' defaultValue='0.0'>
+				<Label>Deadband:</Label>
+			</Field>
+			<Field id='inputDecimals' type='textfield' defaultValue='1'>
+				<Label>Decimals:</Label>
+			</Field>
+			<Field id='inputUnits' type='textfield'>
+				<Label>Units:</Label>
+			</Field>
+			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>This will appear on control pages and the Indigo UI</Label>
+			</Field>
+			<Field type="separator" id="coolSeparator" />
+			<Field id='coolSection' type='label' fontColor='blue'>
+                <Label>High Threshold</Label>
+			</Field>
+			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat, but can be anything.</Label>
+			</Field>
+			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
+				<Label>Use High Setpoint:</Label>
+			</Field>
+			<Field id='coolDevices' type='list' rows='16' visibleBindingId='SupportsCoolSetpoint' visibleBindingValue='true'>
+	            <Label>Devices:</Label>
+                <List class='indigo.devices' filter='indigo.relay, indigo.dimmer, indigo.speedcontrol'/>
+	        </Field>
+			<Field type="separator" id="heatSeparator" />
+			<Field id='heatSection' type='label' fontColor='blue'>
+                <Label>Low Threshold</Label>
+			</Field>
+			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat, but can be anything.</Label>
+			</Field>
+			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
+				<Label>Use Low Setpoint:</Label>
+			</Field>
+			<Field id='heatDevices' type='list' rows='16' visibleBindingId='SupportsHeatSetpoint' visibleBindingValue='true'>
+	            <Label>Devices:</Label>
+                <List class='indigo.devices' filter='indigo.relay, indigo.dimmer, indigo.speedcontrol'/>
+	        </Field>
+			<Field type="separator" id="controlSeparator" />
+			<Field id='controlSection' type='label' fontColor='blue'>
+                <Label>Device Control</Label>
+			</Field>
+			<Field id='reverseDescription' type='label' visibleBindingId='deviceControlMode' visibleBindingValue='reverse' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>OFF when above high setpoint or below low setpoint</Label>
+			</Field>
+			<Field id='speedControlLevel' type='menu' defaultValue='3'>
+				<Label>Fans ON level:</Label>
+				<List>
+					<Option value='1'>Low</Option>
+					<Option value='2'>Medium</Option>
+					<Option value='3'>High</Option>
+				</List>
+			</Field>
+			<Field id='dimmerControlLevel' type='textfield' defaultValue='100'>
+				<Label>Dimmers ON level:</Label>
+			</Field>
+			<Field id='deviceControlMode' type='menu' defaultValue='normal'>
+				<Label>Control Mode:</Label>
+				<List>
+					<Option value='normal'>Normal</Option>
+					<Option value='reverse'>Reverse</Option>
+				</List>
+			</Field>
+			<Field id='normalDescription' type='label' visibleBindingId='deviceControlMode' visibleBindingValue='normal' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>ON when above high setpoint or below low setpoint</Label>
+			</Field>
+		</ConfigUI>
+		<States>
+		</States>
+	</Device>
+	<Device type="thermostat" id="ActionGroupUnistat">
+		<Name>Action Group Unistat</Name>
+		<ConfigUI>
+			<Field id='description0' type='label'>
+                <Label>Executes action groups when input value crosses threshold.</Label>
+            </Field>
+            <Field id='tempSeparator' type='separator' />
+			<Field id='tempSection' type='label' fontColor='blue'>
+                <Label>Input</Label>
+			</Field>
+			<Field id='tempDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Define the source of the input data.  This will appear in UI as a temperature, but can be any numerical value.</Label>
+			</Field>
+			<Field id='inputType' type='menu' defaultValue='dev'>
+				<Label>Input Source Type</Label>
+				<List>
+					<Option value='dev'>Device State</Option>
+					<Option value='var'>Variable Value</Option>
+				</List>
+			</Field>
+			<Field id='inputDevice' type='menu' visibleBindingId='inputType' visibleBindingValue='dev'>
+                <Label>Input Device:</Label>
+                <List class='self' method='getInputDeviceList'/>
+				<CallbackMethod>loadStates</CallbackMethod>
+            </Field>
+			<Field id='inputState' type='menu' visibleBindingId='inputType' visibleBindingValue='dev'>
+                <Label>Input State:</Label>
+                <List class='self' filter='inputDevice' method='getDeviceStateList' dynamicReload='true'/>
+            </Field>
+			<Field id='inputVariable' type='menu' visibleBindingId='inputType' visibleBindingValue='var'>
+                <Label>Input Variable:</Label>
+                <List class='indigo.variables'/>
+            </Field>
+			<Field id='deadband' type='textfield' defaultValue='0.0'>
+				<Label>Deadband:</Label>
+			</Field>
+			<Field id='inputDecimals' type='textfield' defaultValue='1'>
+				<Label>Decimals:</Label>
+			</Field>
+			<Field id='inputUnits' type='textfield'>
+				<Label>Units:</Label>
+			</Field>
+			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>This will appear on control pages and the Indigo UI</Label>
+			</Field>
+			<Field type="separator" id="coolSeparator" />
+			<Field id='coolSection' type='label' fontColor='blue'>
+                <Label>High Threshold</Label>
+			</Field>
+			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat, but can be anything.</Label>
+			</Field>
+			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
+				<Label>Use High Setpoint:</Label>
+			</Field>
+			<Field id='coolerOnActionGroup' type='menu' visibleBindingId='SupportsCoolSetpoint' visibleBindingValue='true'>
+	            <Label>ON Action Group:</Label>
+                <List class='self' method='getActionGroups'/>
+	        </Field>
+			<Field id='coolerOffActionGroup' type='menu' visibleBindingId='SupportsCoolSetpoint' visibleBindingValue='true'>
+	            <Label>OFF Action Group:</Label>
+                <List class='self' method='getActionGroups'/>
+	        </Field>
+			<Field type="separator" id="heatSeparator" />
+			<Field id='heatSection' type='label' fontColor='blue'>
+                <Label>Low Threshold</Label>
+			</Field>
+			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat, but can be anything.</Label>
+			</Field>
+			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
+				<Label>Use Low Setpoint:</Label>
+			</Field>
+			<Field id='heaterOnActionGroup' type='menu' visibleBindingId='SupportsHeatSetpoint' visibleBindingValue='true'>
+	            <Label>ON Action Group:</Label>
+                <List class='self' method='getActionGroups'/>
+	        </Field>
+			<Field id='heaterOffActionGroup' type='menu' visibleBindingId='SupportsHeatSetpoint' visibleBindingValue='true'>
+	            <Label>OFF Action Group:</Label>
+                <List class='self' method='getActionGroups'/>
+	        </Field>
+		</ConfigUI>
+		<States>
+		</States>
+	</Device>
+</Devices>
