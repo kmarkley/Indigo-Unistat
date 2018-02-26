@@ -325,7 +325,7 @@ class UnistatBase(object):
     #-------------------------------------------------------------------------------
     def deviceUpdated(self, oldDev, newDev):
         if newDev.id == self.inputDevice:
-            self.temperatureInput = newdev.states[self.inputState]
+            self.temperatureInput = newDev.states[self.inputState]
 
     #-------------------------------------------------------------------------------
     def variableUpdated(self, oldVar, newVar):
@@ -359,9 +359,9 @@ class UnistatBase(object):
         return self.dev.states['temperatureInput1']
     def _temperatureInputSet(self, temp):
         try:
-            self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue='{:.{}f}{}'.format(float(temp),self.decimals,self.units))
+            self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue=u'{:.{}f}{}'.format(float(temp),self.decimals,self.units))
         except ValueError:
-            self.logger.error('"{}" received invalid input "{}"'.format(self.name, temp))
+            self.logger.error('"{}" received invalid input "{}" ({})'.format(self.name, temp, type(temp)))
     temperatureInput = property(_temperatureInputGet,_temperatureInputSet)
 
     #-------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ class UnistatBase(object):
             return 0.0
     def _setpointCoolSet(self, setpoint):
         if setpoint != self.setpointCool:
-            self.dev.updateStateOnServer('setpointCool', setpoint, uiValue='{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
+            self.dev.updateStateOnServer('setpointCool', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
             self.logger.info('"{}" set high setpoint to {}'.format(self.name, setpoint))
     setpointCool = property(_setpointCoolGet,_setpointCoolSet)
 
@@ -393,7 +393,7 @@ class UnistatBase(object):
             return 0.0
     def _setpointHeatSet(self, setpoint):
         if setpoint != self.setpointHeat:
-            self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue='{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
+            self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
             self.logger.info('"{}" set low setpoint to {}'.format(self.name, setpoint))
     setpointHeat = property(_setpointHeatGet,_setpointHeatSet)
 
