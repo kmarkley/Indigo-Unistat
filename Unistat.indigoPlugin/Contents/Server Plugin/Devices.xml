@@ -33,29 +33,35 @@
                 <Label>Input Variable:</Label>
                 <List class='indigo.variables'/>
             </Field>
-			<Field id='deadband' type='textfield' defaultValue='0.0'>
+			<Field id='deadband' type='textfield' defaultValue='1.0'>
 				<Label>Deadband:</Label>
+			</Field>
+			<Field id='deadbandDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>Total width of deadband, centered on setpoint</Label>
 			</Field>
 			<Field id='inputDecimals' type='textfield' defaultValue='1'>
 				<Label>Decimals:</Label>
+			</Field>
+			<Field id='decimalsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>For control pages and the Indigo UI</Label>
 			</Field>
 			<Field id='inputUnits' type='textfield'>
 				<Label>Units:</Label>
 			</Field>
 			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>This will appear on control pages and the Indigo UI</Label>
+				<Label>For control pages and the Indigo UI</Label>
 			</Field>
 			<Field type="separator" id="coolSeparator" />
 			<Field id='coolSection' type='label' fontColor='blue'>
                 <Label>High Threshold</Label>
 			</Field>
 			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat, but can be anything.</Label>
+                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat (but can be anything).</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
 				<Label>Use High Setpoint:</Label>
 			</Field>
-			<Field id='coolDevices' type='list' rows='16' visibleBindingId='SupportsCoolSetpoint' visibleBindingValue='true'>
+			<Field id='coolDevices' type='list'  rows='8' visibleBindingId='SupportsCoolSetpoint' visibleBindingValue='true'>
 	            <Label>Devices:</Label>
                 <List class='indigo.devices' filter='indigo.relay, indigo.dimmer, indigo.speedcontrol'/>
 	        </Field>
@@ -64,12 +70,12 @@
                 <Label>Low Threshold</Label>
 			</Field>
 			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat, but can be anything.</Label>
+                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat (but can be anything).</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
 				<Label>Use Low Setpoint:</Label>
 			</Field>
-			<Field id='heatDevices' type='list' rows='16' visibleBindingId='SupportsHeatSetpoint' visibleBindingValue='true'>
+			<Field id='heatDevices' type='list'  rows='8' visibleBindingId='SupportsHeatSetpoint' visibleBindingValue='true'>
 	            <Label>Devices:</Label>
                 <List class='indigo.devices' filter='indigo.relay, indigo.dimmer, indigo.speedcontrol'/>
 	        </Field>
@@ -77,10 +83,7 @@
 			<Field id='controlSection' type='label' fontColor='blue'>
                 <Label>Device Control</Label>
 			</Field>
-			<Field id='reverseDescription' type='label' visibleBindingId='deviceControlMode' visibleBindingValue='reverse' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>OFF when above high setpoint or below low setpoint</Label>
-			</Field>
-			<Field id='speedControlLevel' type='menu' defaultValue='3'>
+			<Field id='speedControlIndex' type='menu' defaultValue='3'>
 				<Label>Fans ON level:</Label>
 				<List>
 					<Option value='1'>Low</Option>
@@ -100,6 +103,28 @@
 			</Field>
 			<Field id='normalDescription' type='label' visibleBindingId='deviceControlMode' visibleBindingValue='normal' fontSize='small' fontColor='darkgray' alignWithControl='true'>
 				<Label>ON when above high setpoint or below low setpoint</Label>
+			</Field>
+			<Field id='reverseDescription' type='label' visibleBindingId='deviceControlMode' visibleBindingValue='reverse' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>OFF when above high setpoint or below low setpoint</Label>
+			</Field>
+			<Field id='modeSeparator' type='separator' />
+			<Field id='modeSection' type='label' fontColor='blue'>
+                <Label>Mode Names</Label>
+			</Field>
+			<Field id='modeDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>If this device is not a regular thermostat, mode names like 'Cool' or 'Heat' may not make sense.  Define alternative names here to change how they appear on control pages and in the log (but not in the client UI).'</Label>
+			</Field>
+			<Field id='modeNameOff' type='textfield' defaultValue='Off'>
+				<Label>'Off' Mode Name</Label>
+			</Field>
+			<Field id='modeNameHeat' type='textfield' defaultValue='Heat'>
+				<Label>'Heat' Mode Name</Label>
+			</Field>
+			<Field id='modeNameCool' type='textfield' defaultValue='Cool'>
+				<Label>'Cool' Mode Name</Label>
+			</Field>
+			<Field id='modeNameAuto' type='textfield' defaultValue='Auto'>
+				<Label>'Auto' Mode Name</Label>
 			</Field>
 		</ConfigUI>
 		<States>
@@ -138,24 +163,30 @@
                 <Label>Input Variable:</Label>
                 <List class='indigo.variables'/>
             </Field>
-			<Field id='deadband' type='textfield' defaultValue='0.0'>
+			<Field id='deadband' type='textfield' defaultValue='1.0'>
 				<Label>Deadband:</Label>
+			</Field>
+			<Field id='deadbandDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>Total width of deadband, centered on setpoint</Label>
 			</Field>
 			<Field id='inputDecimals' type='textfield' defaultValue='1'>
 				<Label>Decimals:</Label>
+			</Field>
+			<Field id='decimalsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
+				<Label>For control pages and Indigo UI</Label>
 			</Field>
 			<Field id='inputUnits' type='textfield'>
 				<Label>Units:</Label>
 			</Field>
 			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>This will appear on control pages and the Indigo UI</Label>
+				<Label>For control pages and Indigo UI</Label>
 			</Field>
 			<Field type="separator" id="coolSeparator" />
 			<Field id='coolSection' type='label' fontColor='blue'>
                 <Label>High Threshold</Label>
 			</Field>
 			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat, but can be anything.</Label>
+                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat (but can be anything).</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
 				<Label>Use High Setpoint:</Label>
@@ -173,7 +204,7 @@
                 <Label>Low Threshold</Label>
 			</Field>
 			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat, but can be anything.</Label>
+                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat (but can be anything).</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
 				<Label>Use Low Setpoint:</Label>
@@ -186,6 +217,25 @@
 	            <Label>OFF Action Group:</Label>
                 <List class='self' method='getActionGroups'/>
 	        </Field>
+			<Field id='modeSeparator' type='separator' />
+			<Field id='modeSection' type='label' fontColor='blue'>
+                <Label>Mode Names</Label>
+			</Field>
+			<Field id='modeDescription' type='label' fontSize='small' fontColor='darkgray'>
+				<Label>If this device is not a regular thermostat, mode names like 'Cool' or 'Heat' may not make sense.  Define alternative names here to change how they appear on control pages and in the log (but not in the client UI).'</Label>
+			</Field>
+			<Field id='modeNameOff' type='textfield' defaultValue='Off'>
+				<Label>'Off' Mode Name</Label>
+			</Field>
+			<Field id='modeNameHeat' type='textfield' defaultValue='Heat'>
+				<Label>'Heat' Mode Name</Label>
+			</Field>
+			<Field id='modeNameCool' type='textfield' defaultValue='Cool'>
+				<Label>'Cool' Mode Name</Label>
+			</Field>
+			<Field id='modeNameAuto' type='textfield' defaultValue='Auto'>
+				<Label>'Auto' Mode Name</Label>
+			</Field>
 		</ConfigUI>
 		<States>
 		</States>

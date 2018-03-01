@@ -12,17 +12,7 @@ from ghpu import GitHubPluginUpdater
 # our global name space by the host process.
 
 ################################################################################
-kHvacModeEnumToStrMap = {
-    indigo.kHvacMode.Cool               : u"high only",
-    indigo.kHvacMode.Heat               : u"low only",
-    indigo.kHvacMode.HeatCool           : u"auto high/low",
-    indigo.kHvacMode.Off                : u"off",
-    indigo.kHvacMode.ProgramHeat        : u"program low",
-    indigo.kHvacMode.ProgramCool        : u"program high",
-    indigo.kHvacMode.ProgramHeatCool    : u"program auto"
-}
-def _lookupUiStrFromHvacMode(hvacMode):
-    return kHvacModeEnumToStrMap.get(hvacMode, u"unknown")
+# Globals
 
 k_updateCheckHours = 24
 
@@ -41,9 +31,9 @@ class Plugin(indigo.PluginBase):
     def startup(self):
         self.nextCheck = self.pluginPrefs.get('nextUpdateCheck',0)
         self.debug = self.pluginPrefs.get("showDebugInfo",False)
-        self.logger.debug("startup")
+        self.logger.debug(u"startup")
         if self.debug:
-            self.logger.debug("Debug logging enabled")
+            self.logger.debug(u"Debug logging enabled")
         self.deviceDict = dict()
 
         indigo.devices.subscribeToChanges()
@@ -51,17 +41,17 @@ class Plugin(indigo.PluginBase):
 
     #-------------------------------------------------------------------------------
     def shutdown(self):
-        self.logger.debug("shutdown")
+        self.logger.debug(u"shutdown")
         self.pluginPrefs['nextUpdateCheck'] = self.nextCheck
-        self.pluginPrefs["showDebugInfo"] = self.debug
+        self.pluginPrefs['showDebugInfo'] = self.debug
 
     #-------------------------------------------------------------------------------
     def closedPrefsConfigUi(self, valuesDict, userCancelled):
-        self.logger.debug("closedPrefsConfigUi")
+        self.logger.debug(u"closedPrefsConfigUi")
         if not userCancelled:
-            self.debug = valuesDict.get("showDebugInfo",False)
+            self.debug = valuesDict.get('showDebugInfo',False)
             if self.debug:
-                self.logger.debug("Debug logging enabled")
+                self.logger.debug(u"Debug logging enabled")
 
     #-------------------------------------------------------------------------------
     def runConcurrentThread(self):
@@ -77,7 +67,7 @@ class Plugin(indigo.PluginBase):
     # Device Methods
     #-------------------------------------------------------------------------------
     def deviceStartComm(self, dev):
-        self.logger.debug("deviceStartComm: {}".format(dev.name))
+        self.logger.debug(u"deviceStartComm: {}".format(dev.name))
         if dev.configured:
             if dev.deviceTypeId == 'DeviceUnistat':
                 self.deviceDict[dev.id] = DeviceUnistat(dev, self.logger)
@@ -86,7 +76,7 @@ class Plugin(indigo.PluginBase):
 
     #-------------------------------------------------------------------------------
     def deviceStopComm(self, dev):
-        self.logger.debug("deviceStopComm: {}".format(dev.name))
+        self.logger.debug(u"deviceStopComm: {}".format(dev.name))
         if dev.id in self.deviceDict:
             del self.deviceDict[dev.id]
 
@@ -96,47 +86,38 @@ class Plugin(indigo.PluginBase):
 
         # validate input
         if valuesDict.get('inputType','dev') == 'dev':
-            if not valuesDict.get('inputDevice',0):
-                errorsDict['inputDevice'] = "Required"
-            else:
-                if not valuesDict.get('inputState',''):
-                    errorsDict['inputState'] = "Required"
-                else:
+            if valuesDict.get('inputDevice',0):
+                if valuesDict.get('inputState',''):
                     testStateValue = indigo.devices[int(valuesDict['inputDevice'])].states[valuesDict['inputState']]
-                    try: num = float(testStateValue)
-                    except: errorsDict['inputState'] = "Must be a numerical state"
+                    if not validateTextFieldNumber(testStateValue, numType=float, zero=True, negative=True):
+                        errorsDict['inputState'] = "Must be a numerical state"
+                else:
+                    errorsDict['inputState'] = "Required"
+            else:
+                errorsDict['inputDevice'] = "Required"
 
         elif valuesDict.get('inputType','dev') == 'var':
-            if not valuesDict.get('inputVariable',0):
-                errorsDict['inputVariable'] = "Required"
-            else:
+            if valuesDict.get('inputVariable',0):
                 testStateValue = indigo.variables[int(valuesDict['inputVariable'])].value
-                try: num = float(testStateValue)
-                except: errorsDict['inputVariable'] = "Must have a numerical value"
+                if not validateTextFieldNumber(testStateValue, numType=float, zero=True, negative=True):
+                    errorsDict['inputVariable'] = "Must have a numerical value"
+            else:
+                errorsDict['inputVariable'] = "Required"
 
-        try:
-            if float(valuesDict['deadband']) < 0.0:
-                raise
-        except:
+        if not validateTextFieldNumber(valuesDict['deadband'], numType=float, zero=True, negative=False):
             errorsDict['deadband'] = "Must be a number 0 or greater"
 
-        try:
-            if int(valuesDict['inputDecimals']) < 0:
-                raise
-        except:
+        if not validateTextFieldNumber(valuesDict['inputDecimals'], numType=int, zero=True, negative=False):
             errorsDict['inputDecimals'] = "Must be an integer 0 or greater"
 
         # validate device unistat
         if typeId == 'DeviceUnistat':
-            try:
-                if int(valuesDict['dimmerControlLevel']) <= 0:
-                    raise
-            except:
+            if not validateTextFieldNumber(valuesDict['dimmerControlLevel'], numType=int, zero=False, negative=False):
                 errorsDict['dimmerControlLevel'] = "Must be a positive integer"
 
 
         if len(errorsDict) > 0:
-            self.logger.debug('validate device config error: \n{}'.format(errorsDict))
+            self.logger.debug(u"validate device config error: \n{}".format(errorsDict))
             return (False, valuesDict, errorsDict)
         return (True, valuesDict)
 
@@ -144,28 +125,16 @@ class Plugin(indigo.PluginBase):
     # Device Config callbacks
     #-------------------------------------------------------------------------------
     def getInputDeviceList(self, filter='', valuesDict=dict(), typeId='', targetId=0):
-        devList = list()
-        for dev in indigo.devices.iter():
-            if not dev.id == targetId:
-                devList.append((dev.id, dev.name))
-        return devList
+        return [(dev.id, dev.name) for dev in indigo.devices.iter() if (dev.id != targetId)]
 
     #-------------------------------------------------------------------------------
     def getDeviceStateList(self, filter=None, valuesDict=dict(), typeId='', targetId=0):
-        stateList = list()
         devId = zint(valuesDict.get(filter,0))
-        if devId:
-            for state in indigo.devices[devId].states:
-                stateList.append((state,state))
-        return stateList
+        return [(state, state) for state in indigo.devices[devId].states] if devId else []
 
     #-------------------------------------------------------------------------------
     def getActionGroups(self, filter=None, valuesDict=dict(), typeId='', targetId=0):
-        actionList = list()
-        for action in indigo.actionGroups.iter():
-            actionList.append((action.id, action.name))
-        actionList.append((0,'-- None --'))
-        return actionList
+        return [(action.id, action.name) for action in indigo.actionGroups.iter()] + [(0,'-- None --')]
 
     #-------------------------------------------------------------------------------
     def loadStates(self, valuesDict=None, typeId='', targetId=0):
@@ -209,7 +178,7 @@ class Plugin(indigo.PluginBase):
 
         ###### OTHER ACTIONS ######
         else:
-            self.logger.debug('"{}" {} action not available'.format(dev.name, unicode(action.thermostatAction)))
+            self.logger.debug(u'"{}" {} action not available'.format(dev.name, unicode(action.thermostatAction)))
 
     #-------------------------------------------------------------------------------
     # General Action callback
@@ -223,7 +192,7 @@ class Plugin(indigo.PluginBase):
 
         ###### OTHER ACTIONS ######
         else:
-            self.logger.debug('"{}" {} action not available'.format(dev.name, unicode(action.thermostatAction)))
+            self.logger.debug(u'"{}" {} action not available'.format(dev.name, unicode(action.deviceAction)))
 
 
     #-------------------------------------------------------------------------------
@@ -233,7 +202,7 @@ class Plugin(indigo.PluginBase):
         try:
             self.updater.checkForUpdate()
         except Exception as e:
-            msg = 'Check for update error.  Next attempt in {} hours.'.format(k_updateCheckHours)
+            msg = u"Check for update error.  Next attempt in {} hours.".format(k_updateCheckHours)
             if self.debug:
                 self.logger.exception(msg)
             else:
@@ -252,11 +221,11 @@ class Plugin(indigo.PluginBase):
     #-------------------------------------------------------------------------------
     def toggleDebug(self):
         if self.debug:
-            self.logger.debug("Debug logging disabled")
+            self.logger.debug(u"Debug logging disabled")
             self.debug = False
         else:
             self.debug = True
-            self.logger.debug("Debug logging enabled")
+            self.logger.debug(u"Debug logging enabled")
 
     #-------------------------------------------------------------------------------
     # subscribed changes
@@ -266,15 +235,15 @@ class Plugin(indigo.PluginBase):
             # device belongs to plugin
             indigo.PluginBase.deviceUpdated(self, oldDev, newDev)
             if newDev.id in self.deviceDict:
-                self.deviceDict[newDev.id].selfUpdated(newDev)
+                self.deviceDict[newDev.id].selfDeviceUpdated(newDev)
         else:
             for devId, unistatDevice in self.deviceDict.items():
-                unistatDevice.deviceUpdated(oldDev, newDev)
+                unistatDevice.inputDeviceUpdated(newDev)
 
     #-------------------------------------------------------------------------------
     def variableUpdated(self, oldVar, newVar):
         for devId, unistatDevice in self.deviceDict.items():
-            unistatDevice.variableUpdated(oldVar, newVar)
+            unistatDevice.inputVariableUpdated(newVar)
 
 ###############################################################################
 # Classes
@@ -293,64 +262,85 @@ class UnistatBase(object):
         self.props['ShowCoolHeatEquipmentStateUI'] = True
         self.props['NumTemperatureInputs'] = 1
         self.props['NumHumidityInputs'] = 0
-        instance.replacePluginPropsOnServer(self.props)
+        if self.props != instance.pluginProps:
+            instance.replacePluginPropsOnServer(self.props)
 
         if self.props.get('inputType','dev') == 'dev':
-            self.inputDevice = int(self.props['inputDevice'])
-            self.inputState = self.props['inputState']
-            self.inputVariable = None
+            self.inputDeviceId = int(self.props['inputDevice'])
+            self.inputStateKey = self.props['inputState']
+            self.inputVariableId = None
+        elif self.props.get('inputType','dev') == 'var':
+            self.inputDeviceId = None
+            self.inputStateKey = None
+            self.inputVariableId = int(self.props['inputVariable'])
         else:
-            self.inputDevice = None
-            self.inputState = None
-            self.inputVariable = int(self.props['inputVariable'])
+            self.logger.error(u'"{}" input init failed'.format(self.name))
+            raise
 
-        self.halfband = float(self.props.get('deadband', 0.0))/2.0
-        self.units = self.props.get('inputUnits','')
+        self.halfband = float(self.props.get('deadband', 1.0))/2.0
+        self.units = self.props.get('inputUnits',u'')
         self.decimals = int(self.props.get('inputDecimals', 1))
+
+        self.modeNameMap = {
+            indigo.kHvacMode.Off        : self.props.get('modeNameOff',  u'Off' ),
+            indigo.kHvacMode.Heat       : self.props.get('modeNameHeat', u'Heat'),
+            indigo.kHvacMode.Cool       : self.props.get('modeNameCool', u'Cool'),
+            indigo.kHvacMode.HeatCool   : self.props.get('modeNameAuto', u'Auto'),
+            }
 
         self.requestTemperature()
 
     #-------------------------------------------------------------------------------
     def requestTemperature(self):
-        if self.props.get('inputType','dev') == 'dev':
-            self.temperatureInput = indigo.devices[self.inputDevice].states[self.inputState]
-        else:
-            self.temperatureInput = indigo.variables[self.inputVariable].value
+        if self.inputDeviceId:
+            try:
+                self.temperatureInput = indigo.devices[self.inputDeviceId].states[self.inputStateKey]
+            except KeyError:
+                self.logger.error(u'Input device {} does not exist.  Reconfigure "{}".'.format(self.inputDeviceId,self.name))
+        elif self.inputVariableId:
+            try:
+                self.temperatureInput = indigo.variables[self.inputVariableId].value
+            except KeyError:
+                self.logger.error(u'Input variable {} does not exist.  Reconfigure "{}".'.format(self.inputVariableId,self.name))
 
     #-------------------------------------------------------------------------------
-    def selfUpdated(self, newDev):
+    def selfDeviceUpdated(self, newDev):
         self.dev = newDev
-        self.evaluateEquipmentState()
+        self.logger.debug(u'"{}" evaluate equipment state [in:{} hi:{}, lo:{}, hb:{}]'.format(
+            self.name, self.temperatureInput, self.setpointCool, self.setpointHeat, self.halfband))
 
-    #-------------------------------------------------------------------------------
-    def deviceUpdated(self, oldDev, newDev):
-        if newDev.id == self.inputDevice:
-            self.temperatureInput = newDev.states[self.inputState]
-
-    #-------------------------------------------------------------------------------
-    def variableUpdated(self, oldVar, newVar):
-        if newVar.id == self.inputVariable:
-            self.temperatureInput = newVar.value
-
-    #-------------------------------------------------------------------------------
-    def evaluateEquipmentState(self):
-        self.logger.debug('"{}" evaluateEquipmentState [temp:{} cool:{} heat:{} mode:{}]'.format(
-                self.name, self.temperatureInput, self.setpointCool, self.setpointHeat, self.hvacOperationMode))
+        # evaluate cool equipment state
         if self.hvacCoolerEnabled:
             if self.temperatureInput > self.setpointCool + self.halfband:
                 self.hvacCoolerIsOn = True
-            elif self.temperatureInput < self.setpointCool - self.halfband:
+            elif self.temperatureInput <= self.setpointCool - self.halfband:
                 self.hvacCoolerIsOn = False
         else:
             self.hvacCoolerIsOn = False
 
+        # evaluate heat equipment state
         if self.hvacHeaterEnabled:
             if self.temperatureInput < self.setpointHeat - self.halfband:
                 self.hvacHeaterIsOn = True
-            elif self.temperatureInput > self.setpointHeat + self.halfband:
+            elif self.temperatureInput >= self.setpointHeat + self.halfband:
                 self.hvacHeaterIsOn = False
         else:
             self.hvacHeaterIsOn = False
+
+    #-------------------------------------------------------------------------------
+    def inputDeviceUpdated(self, newDev):
+        if newDev.id == self.inputDeviceId:
+            self.temperatureInput = newDev.states[self.inputStateKey]
+
+    #-------------------------------------------------------------------------------
+    def inputVariableUpdated(self, newVar):
+        if newVar.id == self.inputVariableId:
+            self.temperatureInput = newVar.value
+
+    #-------------------------------------------------------------------------------
+    def getModeName(self, mode=None):
+        if mode is None: mode = self.hvacOperationMode
+        return self.modeNameMap.get(mode, u'Unknown')
 
     #-------------------------------------------------------------------------------
     # properties
@@ -358,19 +348,24 @@ class UnistatBase(object):
     def _temperatureInputGet(self):
         return self.dev.states['temperatureInput1']
     def _temperatureInputSet(self, temp):
-        try:
-            self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue=u'{:.{}f}{}'.format(float(temp),self.decimals,self.units))
-        except ValueError:
-            self.logger.error('"{}" received invalid input "{}" ({})'.format(self.name, temp, type(temp)))
+        if temp != self.temperatureInput:
+            try:
+                self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue=u'{:.{}f}{}'.format(float(temp),self.decimals,self.units))
+                self.logger.debug(u'"{}" received input {:.{}f}{}'.format(self.name, float(temp),self.decimals,self.units))
+            except ValueError:
+                self.logger.error(u'"{}" received invalid input "{}" ({})'.format(self.name, temp, type(temp)))
     temperatureInput = property(_temperatureInputGet,_temperatureInputSet)
 
     #-------------------------------------------------------------------------------
     def _hvacOperationModeGet(self):
         return self.dev.states['hvacOperationMode']
     def _hvacOperationModeSet(self, mode):
-        if mode != self.hvacOperationMode:
-            self.dev.updateStateOnServer('hvacOperationMode', mode, uiValue=_lookupUiStrFromHvacMode(mode))
-            self.logger.info('"{}" set mode to {}'.format(self.name, _lookupUiStrFromHvacMode(mode)))
+        if mode in range(4):
+            if mode != self.hvacOperationMode:
+                self.dev.updateStateOnServer('hvacOperationMode', mode, uiValue=self.getModeName(mode))
+                self.logger.info(u'"{}" mode now {}'.format(self.name, self.getModeName(mode)))
+        else:
+            self.logger.error(u'"{}" program mode not supported'.format(self.name))
     hvacOperationMode = property(_hvacOperationModeGet,_hvacOperationModeSet)
 
     #-------------------------------------------------------------------------------
@@ -380,9 +375,12 @@ class UnistatBase(object):
         else:
             return 0.0
     def _setpointCoolSet(self, setpoint):
-        if setpoint != self.setpointCool:
-            self.dev.updateStateOnServer('setpointCool', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
-            self.logger.info('"{}" set high setpoint to {}'.format(self.name, setpoint))
+        if self.props['SupportsCoolSetpoint']:
+            if setpoint != self.setpointCool:
+                self.dev.updateStateOnServer('setpointCool', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint), self.decimals, self.units))
+                self.logger.info(u'"{}" {} setpoint now {}{}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), setpoint, self.units))
+        else:
+            self.logger.error(u'"{}" {} setpoint not supported'.format(self.name, self.getModeName(indigo.kHvacMode.Cool)))
     setpointCool = property(_setpointCoolGet,_setpointCoolSet)
 
     #-------------------------------------------------------------------------------
@@ -392,9 +390,12 @@ class UnistatBase(object):
         else:
             return 0.0
     def _setpointHeatSet(self, setpoint):
-        if setpoint != self.setpointHeat:
-            self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint),self.decimals,self.units))
-            self.logger.info('"{}" set low setpoint to {}'.format(self.name, setpoint))
+        if self.props['SupportsHeatSetpoint']:
+            if setpoint != self.setpointHeat:
+                self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint), self.decimals, self.units))
+                self.logger.info(u'"{}" {} setpoint now {}{}'.format(self.name, self.getModeName(indigo.kHvacMode.Heat), setpoint, self.units))
+        else:
+            self.logger.error(u'"{}" {} setpoint not supported'.format(self.name, self.getModeName(indigo.kHvacMode.Heat)))
     setpointHeat = property(_setpointHeatGet,_setpointHeatSet)
 
     #-------------------------------------------------------------------------------
@@ -403,7 +404,7 @@ class UnistatBase(object):
     def _hvacCoolerIsOnSet(self, onState):
         if onState != self.hvacCoolerIsOn:
             self.dev.updateStateOnServer('hvacCoolerIsOn', onState)
-            self.logger.info('"{}" set high equipment to {}'.format(self.name, ['off','on'][onState]))
+            self.logger.info(u'"{}" {} equipment now {}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), ['off','on'][onState]))
             self.setCoolerEquipmentState(onState)
     hvacCoolerIsOn = property(_hvacCoolerIsOnGet,_hvacCoolerIsOnSet)
 
@@ -413,7 +414,7 @@ class UnistatBase(object):
     def _hvacHeaterIsOnSet(self, onState):
         if onState != self.hvacHeaterIsOn:
             self.dev.updateStateOnServer('hvacHeaterIsOn', onState)
-            self.logger.info('"{}" set low equipment to {}'.format(self.name, ['off','on'][onState]))
+            self.logger.info(u'"{}" {} equipment now {}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), ['off','on'][onState]))
             self.setHeaterEquipmentState(onState)
     hvacHeaterIsOn = property(_hvacHeaterIsOnGet,_hvacHeaterIsOnSet)
 
@@ -454,46 +455,37 @@ class DeviceUnistat(UnistatBase):
         super(DeviceUnistat, self).__init__(instance, logger)
 
         self.reverseMode = self.props.get('deviceControlMode','normal') != 'normal'
-        self.speedControlLevel = int(self.props.get('speedControlLevel', 3))
-        self.dimmerControlLevel = int(self.props.get('dimmerControlLevel', 100))
 
-        self.coolDevices = list()
-        for devId in self.props.get('coolDevices',[]):
-            self.coolDevices.append(indigo.devices[int(devId)])
+        self.coolDeviceIdList = [zint(devId) for devId in self.props.get('coolDevices',[])]
+        self.heatDeviceIdList = [zint(devId) for devId in self.props.get('heatDevices',[])]
 
-        self.heatDevices = list()
-        for devId in self.props.get('heatDevices',[]):
-            self.heatDevices.append(indigo.devices[int(devId)])
-
+        self.speedControlIndex    = [0, int(self.props.get('speedControlIndex', 3))]
+        self.dimmerControlLevel   = [0, int(self.props.get('dimmerControlLevel', 100))]
+        self.relayControlFunction = [indigo.device.turnOff, indigo.device.turnOn]
 
     #-------------------------------------------------------------------------------
     def setCoolerEquipmentState(self, onState):
-        self._setEquipmentState(self.coolDevices, onState)
+        self._setEquipmentState(self.coolDeviceIdList, onState)
 
     #-------------------------------------------------------------------------------
     def setHeaterEquipmentState(self, onState):
-        self._setEquipmentState(self.heatDevices, onState)
+        self._setEquipmentState(self.heatDeviceIdList, onState)
 
     #-------------------------------------------------------------------------------
-    def _setEquipmentState(self, deviceList, onState):
+    def _setEquipmentState(self, deviceIdList, onState):
         if self.reverseMode: onState = not onState
 
-        if onState:
-            speedlevel = self.speedControlLevel
-            dimmerlevel = self.dimmerControlLevel
-            relayfunction = indigo.device.turnOn
-        else:
-            speedlevel = 0
-            dimmerlevel = 0
-            relayfunction = indigo.device.turnOff
-
-        for device in deviceList:
-            if isinstance(device, indigo.SpeedControlDevice):
-                indigo.speedcontrol.setSpeedLevel(device, speedlevel)
-            elif isinstance(device, indigo.DimmerDevice):
-                indigo.dimmer.setBrightness(device, dimmerlevel)
-            else:
-                relayfunction(device)
+        for deviceId in deviceIdList:
+            try:
+                device = indigo.devices[deviceId]
+                if isinstance(device, indigo.SpeedControlDevice):
+                    indigo.speedcontrol.setSpeedIndex(device, self.speedControlIndex[onState])
+                elif isinstance(device, indigo.DimmerDevice):
+                    indigo.dimmer.setBrightness(device, self.dimmerControlLevel[onState])
+                else:
+                    self.relayControlFunction[onState](device)
+            except KeyError:
+                self.logger.error(u'Device {} does not exist.  Reconfigure "{}".'.format(deviceId,self.name))
 
 ###############################################################################
 class ActionGroupUnistat(UnistatBase):
@@ -524,7 +516,11 @@ class ActionGroupUnistat(UnistatBase):
     #-------------------------------------------------------------------------------
     def _executeAction(self, actionId):
         if actionId:
-            indigo.actionGroup.execute(actionId)
+            try:
+                indigo.actionGroup.execute(actionId)
+            except KeyError:
+                self.logger.error(u'Action Group {} does not exist.  Reconfigure device "{}".'.format(actionId,self.name))
+
 
 ################################################################################
 # Utilities
@@ -532,3 +528,14 @@ class ActionGroupUnistat(UnistatBase):
 def zint(value):
     try: return int(value)
     except: return 0
+
+def validateTextFieldNumber(rawInput, numType=float, zero=True, negative=True):
+    try:
+        num = numType(rawInput)
+        if not zero:
+            if num == 0: raise
+        if not negative:
+            if num < 0: raise
+        return True
+    except:
+        return False
