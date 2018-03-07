@@ -43,20 +43,20 @@
 				<Label>Decimals:</Label>
 			</Field>
 			<Field id='decimalsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>For control pages and the Indigo UI</Label>
+				<Label>For control pages and log</Label>
 			</Field>
 			<Field id='inputUnits' type='textfield'>
 				<Label>Units:</Label>
 			</Field>
 			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>For control pages and the Indigo UI</Label>
+				<Label>For control pages and log</Label>
 			</Field>
 			<Field type="separator" id="coolSeparator" />
 			<Field id='coolSection' type='label' fontColor='blue'>
                 <Label>High Threshold</Label>
 			</Field>
 			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat (but can be anything).</Label>
+                <Label>Turn devices on/off if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat but can be anything.</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
 				<Label>Use High Setpoint:</Label>
@@ -70,7 +70,7 @@
                 <Label>Low Threshold</Label>
 			</Field>
 			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat (but can be anything).</Label>
+                <Label>Turn devices on/off if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat but can be anything.</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
 				<Label>Use Low Setpoint:</Label>
@@ -82,6 +82,9 @@
 			<Field type="separator" id="controlSeparator" />
 			<Field id='controlSection' type='label' fontColor='blue'>
                 <Label>Device Control</Label>
+			</Field>
+			<Field id='controlDescription' type='label' fontSize='small' fontColor='darkgray'>
+                <Label>Define how devices are controlled when thresholds are surpassed.</Label>
 			</Field>
 			<Field id='speedControlIndex' type='menu' defaultValue='3'>
 				<Label>Fans ON level:</Label>
@@ -173,20 +176,20 @@
 				<Label>Decimals:</Label>
 			</Field>
 			<Field id='decimalsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>For control pages and Indigo UI</Label>
+				<Label>For control pages and log</Label>
 			</Field>
 			<Field id='inputUnits' type='textfield'>
 				<Label>Units:</Label>
 			</Field>
 			<Field id='unitsDescription' type='label' fontSize='small' fontColor='darkgray' alignWithControl='true'>
-				<Label>For control pages and Indigo UI</Label>
+				<Label>For control pages and log</Label>
 			</Field>
 			<Field type="separator" id="coolSeparator" />
 			<Field id='coolSection' type='label' fontColor='blue'>
                 <Label>High Threshold</Label>
 			</Field>
 			<Field id='coolDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is greater than a high threshold.  This is analogous to controlling cooling equipment from a thermostat (but can be anything).</Label>
+                <Label>Execute action groups when input crosses a high threshold.  This is analogous to controlling cooling equipment from a thermostat but can be anything.</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsCoolSetpoint" defaultValue="true">
 				<Label>Use High Setpoint:</Label>
@@ -204,7 +207,7 @@
                 <Label>Low Threshold</Label>
 			</Field>
 			<Field id='heatDescription' type='label' fontSize='small' fontColor='darkgray'>
-                <Label>Turn on devices if input is less than a low threshold.  This is analogous to controlling heating equipment from a thermostat (but can be anything).</Label>
+                <Label>Execute action groups when input crosses a low threshold.  This is analogous to controlling heating equipment from a thermostat but can be anything.</Label>
 			</Field>
 			<Field type="checkbox" id="SupportsHeatSetpoint" defaultValue="true">
 				<Label>Use Low Setpoint:</Label>
