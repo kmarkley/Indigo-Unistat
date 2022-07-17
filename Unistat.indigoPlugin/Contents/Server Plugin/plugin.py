@@ -4,7 +4,7 @@
 # Copyright (c) 2016, Perceptive Automation, LLC. All rights reserved.
 # http://www.indigodomo.com
 
-import indigo
+import indigo #noqa
 import time
 
 # Note the "indigo" module is automatically imported and made available inside
@@ -161,7 +161,7 @@ class Plugin(indigo.PluginBase):
 
         ###### OTHER ACTIONS ######
         else:
-            self.logger.debug(u'"{}" {} action not available'.format(dev.name, unicode(action.thermostatAction)))
+            self.logger.debug(f'"{dev.name}" {action.thermostatAction} action not available')
 
     #-------------------------------------------------------------------------------
     # General Action callback
@@ -175,7 +175,7 @@ class Plugin(indigo.PluginBase):
 
         ###### OTHER ACTIONS ######
         else:
-            self.logger.debug(u'"{}" {} action not available'.format(dev.name, unicode(action.deviceAction)))
+            self.logger.debug(f'"{dev.name}" {action.deviceAction} action not available')
 
 
     #-------------------------------------------------------------------------------
@@ -236,18 +236,18 @@ class UnistatBase(object):
             self.inputStateKey = None
             self.inputVariableId = int(self.props['inputVariable'])
         else:
-            self.logger.error(u'"{}" input init failed'.format(self.name))
+            self.logger.error(f'"{self.name}" input init failed')
             raise
 
         self.halfband = float(self.props.get('deadband', 1.0))/2.0
-        self.units = self.props.get('inputUnits',u'')
+        self.units = self.props.get('inputUnits','')
         self.decimals = int(self.props.get('inputDecimals', 1))
 
         self.modeNameMap = {
-            indigo.kHvacMode.Off        : self.props.get('modeNameOff',  u'Off' ),
-            indigo.kHvacMode.Heat       : self.props.get('modeNameHeat', u'Heat'),
-            indigo.kHvacMode.Cool       : self.props.get('modeNameCool', u'Cool'),
-            indigo.kHvacMode.HeatCool   : self.props.get('modeNameAuto', u'Auto'),
+            indigo.kHvacMode.Off        : self.props.get('modeNameOff',  'Off' ),
+            indigo.kHvacMode.Heat       : self.props.get('modeNameHeat', 'Heat'),
+            indigo.kHvacMode.Cool       : self.props.get('modeNameCool', 'Cool'),
+            indigo.kHvacMode.HeatCool   : self.props.get('modeNameAuto', 'Auto'),
             }
 
         self.requestTemperature()
@@ -258,18 +258,17 @@ class UnistatBase(object):
             try:
                 self.temperatureInput = indigo.devices[self.inputDeviceId].states[self.inputStateKey]
             except KeyError:
-                self.logger.error(u'Input device {} does not exist.  Reconfigure "{}".'.format(self.inputDeviceId,self.name))
+                self.logger.error(f'Input device {self.inputDeviceId} does not exist.  Reconfigure "{self.name}".')
         elif self.inputVariableId:
             try:
                 self.temperatureInput = indigo.variables[self.inputVariableId].value
             except KeyError:
-                self.logger.error(u'Input variable {} does not exist.  Reconfigure "{}".'.format(self.inputVariableId,self.name))
+                self.logger.error(f'Input variable {self.inputVariableId} does not exist.  Reconfigure "{self.name}".')
 
     #-------------------------------------------------------------------------------
     def selfDeviceUpdated(self, newDev):
         self.dev = newDev
-        self.logger.debug(u'"{}" evaluate equipment state [in:{} hi:{}, lo:{}, hb:{}]'.format(
-            self.name, self.temperatureInput, self.setpointCool, self.setpointHeat, self.halfband))
+        self.logger.debug(f'"{self.name}" evaluate equipment state [in:{self.temperatureInput} hi:{self.setpointCool}, lo:{self.setpointHeat}, hb:{self.halfband}]')
 
         # evaluate cool equipment state
         if self.hvacCoolerEnabled:
@@ -302,7 +301,7 @@ class UnistatBase(object):
     #-------------------------------------------------------------------------------
     def getModeName(self, mode=None):
         if mode is None: mode = self.hvacOperationMode
-        return self.modeNameMap.get(mode, u'Unknown')
+        return self.modeNameMap.get(mode, 'Unknown')
 
     #-------------------------------------------------------------------------------
     # properties
@@ -312,10 +311,10 @@ class UnistatBase(object):
     def _temperatureInputSet(self, temp):
         if temp != self.temperatureInput:
             try:
-                self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue=u'{:.{}f}{}'.format(float(temp),self.decimals,self.units))
-                self.logger.debug(u'"{}" received input {:.{}f}{}'.format(self.name, float(temp),self.decimals,self.units))
+                self.dev.updateStateOnServer('temperatureInput1', float(temp), uiValue=f'{float(temp):.{self.decimals}f}{self.units}')
+                self.logger.debug(f'"{self.name}" received input {float(temp):.{self.decimals}f}{self.units}')
             except ValueError:
-                self.logger.error(u'"{}" received invalid input "{}" ({})'.format(self.name, temp, type(temp)))
+                self.logger.error(f'"{self.name}" received invalid input "{temp}" ({type(temp)})')
     temperatureInput = property(_temperatureInputGet,_temperatureInputSet)
 
     #-------------------------------------------------------------------------------
@@ -325,9 +324,9 @@ class UnistatBase(object):
         if mode in range(4):
             if mode != self.hvacOperationMode:
                 self.dev.updateStateOnServer('hvacOperationMode', mode, uiValue=self.getModeName(mode))
-                self.logger.info(u'"{}" mode now {}'.format(self.name, self.getModeName(mode)))
+                self.logger.info(f'"{self.name}" mode now {self.getModeName(mode)}')
         else:
-            self.logger.error(u'"{}" program mode not supported'.format(self.name))
+            self.logger.error(f'"{self.name}" program mode not supported')
     hvacOperationMode = property(_hvacOperationModeGet,_hvacOperationModeSet)
 
     #-------------------------------------------------------------------------------
@@ -339,10 +338,10 @@ class UnistatBase(object):
     def _setpointCoolSet(self, setpoint):
         if self.props['SupportsCoolSetpoint']:
             if setpoint != self.setpointCool:
-                self.dev.updateStateOnServer('setpointCool', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint), self.decimals, self.units))
-                self.logger.info(u'"{}" {} setpoint now {}{}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), setpoint, self.units))
+                self.dev.updateStateOnServer('setpointCool', setpoint, uiValue=f'{float(setpoint):.{self.decimals}f}{self.units}')
+                self.logger.info(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Cool)} setpoint now {setpoint}{self.units}')
         else:
-            self.logger.error(u'"{}" {} setpoint not supported'.format(self.name, self.getModeName(indigo.kHvacMode.Cool)))
+            self.logger.error(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Cool)} setpoint not supported')
     setpointCool = property(_setpointCoolGet,_setpointCoolSet)
 
     #-------------------------------------------------------------------------------
@@ -354,10 +353,10 @@ class UnistatBase(object):
     def _setpointHeatSet(self, setpoint):
         if self.props['SupportsHeatSetpoint']:
             if setpoint != self.setpointHeat:
-                self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue=u'{:.{}f}{}'.format(float(setpoint), self.decimals, self.units))
-                self.logger.info(u'"{}" {} setpoint now {}{}'.format(self.name, self.getModeName(indigo.kHvacMode.Heat), setpoint, self.units))
+                self.dev.updateStateOnServer('setpointHeat', setpoint, uiValue=f'{float(setpoint):.{self.decimals}f}{self.units}')
+                self.logger.info(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Heat)} setpoint now {setpoint}{self.units}')
         else:
-            self.logger.error(u'"{}" {} setpoint not supported'.format(self.name, self.getModeName(indigo.kHvacMode.Heat)))
+            self.logger.error(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Heat)} setpoint not supported')
     setpointHeat = property(_setpointHeatGet,_setpointHeatSet)
 
     #-------------------------------------------------------------------------------
@@ -366,7 +365,7 @@ class UnistatBase(object):
     def _hvacCoolerIsOnSet(self, onState):
         if onState != self.hvacCoolerIsOn:
             self.dev.updateStateOnServer('hvacCoolerIsOn', onState)
-            self.logger.info(u'"{}" {} equipment now {}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), ['off','on'][onState]))
+            self.logger.info(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Cool)} equipment now {["off","on"][onState]}')
             self.setCoolerEquipmentState(onState)
     hvacCoolerIsOn = property(_hvacCoolerIsOnGet,_hvacCoolerIsOnSet)
 
@@ -376,7 +375,7 @@ class UnistatBase(object):
     def _hvacHeaterIsOnSet(self, onState):
         if onState != self.hvacHeaterIsOn:
             self.dev.updateStateOnServer('hvacHeaterIsOn', onState)
-            self.logger.info(u'"{}" {} equipment now {}'.format(self.name, self.getModeName(indigo.kHvacMode.Cool), ['off','on'][onState]))
+            self.logger.info(f'"{self.name}" {self.getModeName(indigo.kHvacMode.Cool)} equipment now {["off","on"][onState]}')
             self.setHeaterEquipmentState(onState)
     hvacHeaterIsOn = property(_hvacHeaterIsOnGet,_hvacHeaterIsOnSet)
 
@@ -447,7 +446,7 @@ class DeviceUnistat(UnistatBase):
                 else:
                     self.relayControlFunction[onState](device)
             except KeyError:
-                self.logger.error(u'Device {} does not exist.  Reconfigure "{}".'.format(deviceId,self.name))
+                self.logger.error(f'Device {deviceId} does not exist.  Reconfigure "{self.name}".')
 
 ###############################################################################
 class ActionGroupUnistat(UnistatBase):
@@ -481,7 +480,7 @@ class ActionGroupUnistat(UnistatBase):
             try:
                 indigo.actionGroup.execute(actionId)
             except KeyError:
-                self.logger.error(u'Action Group {} does not exist.  Reconfigure device "{}".'.format(actionId,self.name))
+                self.logger.error(f'Action Group {actionId} does not exist.  Reconfigure device "{self.name}".')
 
 
 ################################################################################
